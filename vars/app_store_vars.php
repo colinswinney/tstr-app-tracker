@@ -4,18 +4,6 @@
 	$appData = json_decode(file_get_contents($appInfo), true);
 	$appDataEncoded = json_encode($appData);
 
-
-	// $response = wp_remote_get( $appInfo );
-
- //                       // Check for error
-	// if ( is_wp_error( $response ) ) {
-	// 	return;
-	// }
-
- //                // Parse remote HTML file
-	// $dataResponse = wp_remote_retrieve_body( $response );
-
-
 	$appCurrentTitle = $appData['results'][0]['trackName'];
 	$appCurrentPrice = $appData['results'][0]['price'];
 	$appCurrentVersion = $appData['results'][0]['version'];

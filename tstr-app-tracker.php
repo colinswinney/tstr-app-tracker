@@ -2,21 +2,35 @@
 /*
 Plugin Name: thesoundtestroom App Tracker
 Plugin URI: http://colinswinney.com/
-Description: Custom post type creator and tracker for iTunes App Store
+Description: Tracker for iTunes App Store
 Author: Colin Swinney
 Version:1.0
 Author URI:http://colinswinney.com
 */
 
 global $post;
-$plugin_url = WP_PLUGIN_URL . '/thesoundtestroom-apps';
+$plugin_url = WP_PLUGIN_URL . '/tstr-app-tracker';
 
-require('inc/cpt.php');
-require('inc/setup.php');
+
+// activate the cron event
+register_activation_hook( __FILE__, 'app_tracker_activation');
+function app_tracker_activation() {
+	wp_schedule_event(time(), 'hourly', 'app_tracker_hourly_event');
+}
+
+add_action('app_tracker_hourly_event', 'tracker_task_to_do');
+
+
+
+// deactivate the cron event
+register_deactivation_hook( __FILE__, 'app_tracker_deactivation');
+function app_tracker_deactivation() {
+	wp_clear_scheduled_hook('app_tracker_hourly_event');
+}
 
 
 // hourly scan for changes in app store
-function app_tracker_event_task_to_do() {
+function tracker_task_to_do() {
 
 	// WP_Query arguments
 	$args = array (
@@ -42,8 +56,8 @@ function app_tracker_event_task_to_do() {
 			$fifteen_days_ago = strtotime('-15 days');
 			$five_minutes_ago = strtotime('-5 minutes');
 
-			include('inc/app_store_vars.php');
-			include('inc/field_keys.php');
+			include('vars/app_store_vars.php');
+			include('vars/field_keys.php');
 
 			if ( $appData['results'] == NULL ) {
 				return;
@@ -237,9 +251,7 @@ function app_tracker_event_task_to_do() {
 				        wp_set_object_terms( $post_id, 'Audio Units', 'search-terms', true );
 				    }
 
-				    // if ( strpos($appCurrentFeatures, 'iosUniversal') !== false ) {
-				    //     wp_set_object_terms( $post_id, 'iOS Universal', 'devices', true );
-				    // }
+				    
 				    foreach ($appCurrentFeatures as $feature) {
 				    	if ($feature == 'iosUniversal') {
 				    		wp_set_object_terms( $post_id, 'iOS Universal', 'devices', true );
@@ -307,14 +319,7 @@ function app_tracker_event_task_to_do() {
 				        wp_set_object_terms( $post_id, 'Audio Units', 'search-terms', true );
 				    }
 
-				    // if ( strpos($appCurrentFeatures, 'iosUniversal') !== false ) {
-				    //     wp_set_object_terms( $post_id, 'iOS Universal', 'devices', true );
-				    // }
-				    foreach ($appCurrentFeatures as $feature) {
-				    	if ($feature == 'iosUniversal') {
-				    		wp_set_object_terms( $post_id, 'iOS Universal', 'devices', true );
-				    	}
-				  	}
+				    
 					
 			   	}
 		    }
